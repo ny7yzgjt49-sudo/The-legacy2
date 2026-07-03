@@ -1,0 +1,74 @@
+{
+  "summary": "Backend 16/16 tests pass (100%). Frontend flows validated on mobile viewport (390x844): home, auth register, candidati gate + post-login step 1, classifica segments/filters, profile login/logout gate all work. Two frontend defects detected: (1) RED-SCREEN Invariant Violation 'Changing onViewableItemsChanged on the fly is not supported' when navigating to /classifica feed, caused by useRef pattern in classifica.tsx; (2) expo-video on web fails to load streamed videos ('no supported source was found'). Tour tab navigation via bottom tab could not be confirmed (likely due to dev error overlay intercepting) but backend /api/tour is verified (8 stops, register toggles). Font warnings for CormorantGaramond (invalid sfntVersion) are cosmetic but repeated many times.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "classifica feed FlatList",
+        "issue": "React Native Invariant Violation: 'Changing onViewableItemsChanged on the fly is not supported' fires when opening /classifica in feed mode. The dev error overlay/toast is triggered and can obstruct interaction. Reference: /app/frontend/app/(tabs)/classifica.tsx:81-84 — onViewableItemsChanged is provided as viewRef.current (a ref initialized with an inline function). RN/Web requires a stable useCallback + memoized viewabilityConfig, OR use viewabilityConfigCallbackPairs (also refs). Consider: const onViewableChanged = useCallback(({viewableItems})=>{...},[]); const viewConfig = useRef({itemVisiblePercentThreshold:80}).current; then pass onViewableChanged directly.",
+        "testID": "feed-list",
+        "priority": "HIGH"
+      },
+      {
+        "component": "FeedItem / expo-video web streaming",
+        "issue": "PAGEERROR: 'Failed to load because no supported source was found' fires for every FeedItem videoFileUrl on web preview. This is expo-video web limitation; consider showing a graceful poster fallback on web (Platform.OS === 'web') instead of mounting VideoView, or set nativeControls and handle onError. Reference: /app/frontend/app/(tabs)/classifica.tsx:212-231.",
+        "testID": "feed-list",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "global",
+        "issues": [
+          "Repeated font warnings: 'Failed to decode CormorantGaramond-*.ttf — invalid sfntVersion: 168430094'. The custom font files appear to be corrupt or being served as HTML (0x0A0A0A0A signature suggests text/HTML being served instead of binary). Verify assets/fonts/*.ttf are shipped correctly by Metro; may require adding .ttf to assetExts or checking file integrity."
+        ]
+      }
+    ],
+    "react_native_issues": [
+      {
+        "component": "classifica.tsx FlatList",
+        "issue": "onViewableItemsChanged not stable across renders → Invariant Violation red screen. Reference: /app/frontend/app/(tabs)/classifica.tsx:81."
+      },
+      {
+        "component": "expo-video on web",
+        "issue": "VideoView cannot load streamed .mp4 files on web preview (no supported source found). This affects Classifica feed. Note the review request explicitly says video is not testable on web; but the console errors should be suppressed via Platform check. Reference: /app/frontend/app/(tabs)/classifica.tsx:212."
+      },
+      {
+        "component": "index.tsx / classifica.tsx",
+        "issue": "props.pointerEvents deprecated warning ('Use style.pointerEvents'). Reference: /app/frontend/app/(tabs)/classifica.tsx:87 uses <View pointerEvents=\"box-none\">. Migrate to style.pointerEvents."
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_legacy_lab.py",
+    "/app/backend/tests/conftest.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix classifica.tsx onViewableItemsChanged: replace `const viewRef = useRef(callback)` with `useCallback` (stable identity) — this eliminates the red-screen invariant violation.",
+    "In FeedItem / classifica.tsx, guard VideoView with Platform.OS !== 'web' or provide an <Image> fallback poster on web to avoid noisy PAGEERROR entries.",
+    "Migrate `pointerEvents` prop to `style={{pointerEvents:'box-none'}}` in classifica.tsx overlay header.",
+    "Investigate corrupt Cormorant font files under /app/frontend/assets/fonts (all *.ttf appear served as HTML — check metro asset resolution or re-download the fonts).",
+    "Optional: enrich home stats endpoint to return actual region coverage instead of static 20."
+  ],
+  "critical_code_review_comments": [
+    "server.py:399 uses deprecated FastAPI @app.on_event('startup'); prefer lifespan context manager.",
+    "server.py:151 raises inside except without `from` — minor; keeps trace clean.",
+    "Vote endpoint uses full array rewrite ($set voters); acceptable at MVP scale but could use $addToSet/$pull for atomicity.",
+    "classifica.tsx uses useRef with function initializer for viewability callback — anti-pattern causing the invariant violation."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_legacy_lab.py (new)",
+    "/app/backend/tests/conftest.py (new)"
+  ],
+  "success_rate": {"backend": "100% (16/16)", "frontend": "~80% (home, auth, candidati gate+step1, profile OK; classifica feed red-screen; tour bottom-tab nav needs manual verification)"},
+  "seed_data_creation": "Tests create TEST_ prefixed users and 1 application per class run; not cleaned up (acceptable for MVP smoke). Tour is seeded on backend startup (8 stops).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend has full pytest coverage in /app/backend/tests/test_legacy_lab.py — reuse. Frontend needs re-test of Classifica after main agent fixes the useRef → useCallback issue. Also verify Tour tab via bottom nav; text 'Tour' selector was ambiguous during this run (may have been blocked by dev overlay from the invariant error).",
+  "rca_of_issue": "Classifica red screen: In /app/frontend/app/(tabs)/classifica.tsx the FlatList in feed mode is passed onViewableItemsChanged={viewRef.current} where viewRef = useRef(inlineFn). While useRef itself is stable, React Native's VirtualizedList inspects the *identity* of the callback across renders and, in Fabric/Web, flags any perceived change. The reliable pattern is either (a) `const onViewableItemsChanged = useCallback((info) => {...}, []);` passed directly, or (b) `viewabilityConfigCallbackPairs` provided via useRef of an array. Reproduce: open app → login → tap Classifica tab. Mitigation: convert viewRef/viewConfig to useCallback + useRef(config).current."
+}
