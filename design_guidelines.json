@@ -1,0 +1,168 @@
+{
+  "app_name": "The Legacy Lab",
+  "personality": "3 Editorial structure with 6 Glass / Luxe DARK surfaces",
+  "personality_one_liner": "A cinematic, institutional dark-mode experience that elevates Italian heritage through deep navy, vibrant orange, and sophisticated serif typography.",
+  "color": {
+    "surface": "#0F1A2A",
+    "onSurface": "#FFFFFF",
+    "surfaceSecondary": "#1A283B",
+    "onSurfaceSecondary": "#E2E8F0",
+    "surfaceTertiary": "#26364D",
+    "onSurfaceTertiary": "#CBD5E1",
+    "surfaceInverse": "#FFFFFF",
+    "onSurfaceInverse": "#0F1A2A",
+    "brand": "#F57C00",
+    "brandPrimary": "#F57C00",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#C89F5C",
+    "onBrandSecondary": "#0F1A2A",
+    "brandTertiary": "rgba(245, 124, 0, 0.15)",
+    "onBrandTertiary": "#FFB74D",
+    "success": "#4CAF50",
+    "onSuccess": "#FFFFFF",
+    "warning": "#FFCA28",
+    "onWarning": "#0F1A2A",
+    "error": "#E53935",
+    "onError": "#FFFFFF",
+    "info": "#29B6F6",
+    "onInfo": "#0F1A2A",
+    "border": "rgba(255, 255, 255, 0.1)",
+    "borderStrong": "rgba(255, 255, 255, 0.25)",
+    "divider": "rgba(255, 255, 255, 0.08)"
+  },
+  "typography": {
+    "displayFontFamily": "CormorantGaramond_500Medium",
+    "textFontFamily": "Satoshi_500Medium",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous editorial spacing (xl/2xl) to allow the deep navy background to breathe. Avoid dense packing.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": "0",
+  "navigation": "bottom_tabs",
+  "icon_set": "Phosphor",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Use frosted glass overlays (dark navy tinted) on featured hero cards over the Milan architecture image.",
+      "Use glass on the bottom tab bar and sticky headers.",
+      "Ensure a translucent tinted base (≥75% opacity) underneath foreground text on any glass over images."
+    ],
+    "dont's": [
+      "Do not use glass on form fields or standard list rows.",
+      "Do not skip the gradient-to-dark scrim on the full-screen video feed."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Home",
+      "purpose": "A premium editorial feed showcasing the initiative, Italian heritage, and featured applications.",
+      "states": {
+        "loading": "Centered sleek spinner in brandPrimary.",
+        "empty": "Should not be empty; fallback to static institutional description.",
+        "error": "Message 'Unable to load feed' with a refined retry button."
+      },
+      "layout": "Hero section featuring the Milan architecture image with a top-to-bottom dark scrim and Cormorant Garamond display text. Below, a horizontal scroll of 'Featured Applications' (glass-elevated cards) and editorial blocks detailing the 'Made in Italy' mission."
+    },
+    {
+      "name": "Candidati (Apply)",
+      "purpose": "A sophisticated multi-step submission flow for businesses to upload their video and select their heritage pillar.",
+      "states": {
+        "loading": "Uploading indicator with progress percentage.",
+        "empty": "N/A",
+        "error": "Upload failed message with 'Riprova' button."
+      },
+      "layout": "Step 1: Video selection/recording. Step 2: Business description input. Step 3: A 2-column grid or elegant list of the 5 Pillars (Saper Fare, Gusto, Creatività, Commercio, Identità) featuring subtle blurred artisan background images in each card. Floating sticky 'Submit' button at the bottom."
+    },
+    {
+      "name": "Classifica (Video Feed)",
+      "purpose": "A cinematic, full-screen vertical scrolling video feed for public voting and discovering excellence.",
+      "states": {
+        "loading": "Skeleton video placeholders with a shimmer effect.",
+        "empty": "Icon of a soaring falcon + 'Nessuna candidatura ancora.'",
+        "error": "Error message with retry."
+      },
+      "layout": "Full-screen video player (TikTok-style but elegant). Absolutely positioned dark vertical gradient scrim at the bottom (transparent to 80% surfaceInverse) to ensure text legibility. Business name in Cormorant Garamond, description in Satoshi. Right-side or bottom-aligned floating actions (Like/Vote, Share) using Phosphor icons."
+    },
+    {
+      "name": "Tour Nazionale",
+      "purpose": "List of the 80 seminars across 20 regions, celebrating generational succession.",
+      "states": {
+        "loading": "Skeleton list of tour dates.",
+        "empty": "No upcoming dates visible.",
+        "error": "Unable to load tour dates."
+      },
+      "layout": "Top half: Abstract map or hero graphic representing Italy's regions. Bottom half: A generous, cleanly spaced list of cities and dates. Each row has the date prominent on the left, city/seminar title on the right. 'surfaceSecondary' used for active/upcoming stops."
+    },
+    {
+      "name": "Profile & Auth",
+      "purpose": "Authentication and user hub for tracking submitted applications.",
+      "states": {
+        "loading": "Spinner.",
+        "empty": "Illustration of the falcon, 'Log in to view your legacy'.",
+        "error": "Standard error toast."
+      },
+      "layout": "Auth: Single column, labels above inputs, minimalist lines. Profile: Header with the soaring falcon image as a background banner with a dark scrim, user details overlaid. Below, a grid of their submitted mini-videos."
+    }
+  ],
+  "haptics": {
+    "primary_button_press": "impactLight",
+    "video_like_vote": "impactMedium",
+    "tab_change": "selection",
+    "pillar_select": "impactLight"
+  },
+  "images": {
+    "hero_milan_architecture": {
+      "url": "https://images.unsplash.com/photo-1612101983284-c15859891526?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHwzfHxtaWxhbiUyMGNpdHklMjBtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzgyMjM5NDYwfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Aerial view of Milan modern architecture at golden hour"
+    },
+    "category_artisan": {
+      "url": "https://images.unsplash.com/photo-1611523794717-4d1f87dabf3b",
+      "alt": "Italian artisan working in a leather shop"
+    },
+    "brand_falcon": {
+      "url": "https://images.unsplash.com/photo-1524398039352-5905418087d4",
+      "alt": "Falcon soaring in the sky"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Adhere strictly to the Dark Navy (#0F1A2A) and Orange (#F57C00) palette requested by the user. Do not introduce indigo, purple, or generic tech blues.",
+    "Typography must use Cormorant Garamond (max weight 500) for display/headers to maintain the editorial/institutional feel, and Satoshi for body text.",
+    "Implement the 'Classifica' (Video Feed) with a mandatory vertical gradient-to-dark scrim (top transparent -> bottom 80% surface) to ensure the white text is readable over user-uploaded videos.",
+    "Use glassmorphism (expo-glass-effect/expo-blur) for sticky headers, the bottom tab bar, and featured application cards on the Home screen to elevate the 'Luxe' feel.",
+    "For the 'Candidati' screen, implement the 5 pillars (Saper Fare, Gusto, Creatività, Commercio, Identità) as elegant selectable cards, utilizing the artisan image as a subtle background.",
+    "Ensure all buttons and inputs respect the minimum 44x44pt touch targets.",
+    "Wire up haptic feedback for primary actions like voting on videos (impactMedium) and tab changes (selection)."
+  ]
+}
