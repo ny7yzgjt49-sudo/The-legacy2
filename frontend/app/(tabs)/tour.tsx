@@ -91,10 +91,10 @@ export default function Tour() {
               SELECTION TOUR NAZIONALE
             </AppText>
             <Display size={44} style={{ marginTop: spacing.sm }}>
-              Il Tour{"\n"}Nazionale
+              Il Viaggio{"\n"}Nazionale
             </Display>
             <AppText size={14} color={colors.onSurfaceSecondary} style={{ marginTop: spacing.sm }}>
-              80 seminari · 20 regioni · un'unica missione.
+              20 regioni · riprese & interviste · un format TV.
             </AppText>
           </View>
         </View>
@@ -142,7 +142,7 @@ export default function Tour() {
                       style={[styles.regBtn, stop.registered ? styles.regBtnActive : styles.regBtnIdle]}
                     >
                       <Ionicons
-                        name={stop.registered ? "checkmark-circle" : "ticket-outline"}
+                        name={stop.registered ? "checkmark-circle" : "notifications-outline"}
                         size={16}
                         color={stop.registered ? colors.onBrandPrimary : colors.brandPrimary}
                       />
@@ -151,7 +151,7 @@ export default function Tour() {
                         weight="bold"
                         color={stop.registered ? colors.onBrandPrimary : colors.brandPrimary}
                       >
-                        {stop.registered ? "Iscritto" : "Prenota il posto"}
+                        {stop.registered ? "Segui la tappa ✓" : "Segui la tappa"}
                       </AppText>
                     </Pressable>
                   </View>

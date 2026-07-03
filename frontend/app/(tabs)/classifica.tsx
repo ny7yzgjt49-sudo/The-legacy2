@@ -6,6 +6,7 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
+  Platform,
   useWindowDimensions,
 } from "react-native";
 import { Image } from "expo-image";
@@ -78,13 +79,17 @@ export default function Classifica() {
     }
   };
 
-  const viewRef = useRef(({ viewableItems }: any) => {
-    if (viewableItems?.length > 0) setActiveIndex(viewableItems[0].index ?? 0);
-  });
-  const viewConfig = useRef({ itemVisiblePercentThreshold: 80 });
+  const viewabilityPairs = useRef([
+    {
+      viewabilityConfig: { itemVisiblePercentThreshold: 80 },
+      onViewableItemsChanged: ({ viewableItems }: any) => {
+        if (viewableItems?.length > 0) setActiveIndex(viewableItems[0].index ?? 0);
+      },
+    },
+  ]).current;
 
   const Overlay = (
-    <View style={[styles.overlayHeader, { paddingTop: insets.top + spacing.sm }]} pointerEvents="box-none">
+    <View style={[styles.overlayHeader, { paddingTop: insets.top + spacing.sm, pointerEvents: "box-none" }]}>
       <View style={styles.segment}>
         <Segment label="Feed" active={mode === "feed"} onPress={() => setMode("feed")} testID="seg-feed" />
         <Segment label="Classifica" active={mode === "rank"} onPress={() => setMode("rank")} testID="seg-rank" />
@@ -190,8 +195,7 @@ export default function Classifica() {
           keyExtractor={(i) => i.id}
           pagingEnabled
           showsVerticalScrollIndicator={false}
-          onViewableItemsChanged={viewRef.current}
-          viewabilityConfig={viewConfig.current}
+          viewabilityConfigCallbackPairs={viewabilityPairs}
           renderItem={({ item, index }) => (
             <FeedItem
               item={item}
@@ -223,7 +227,9 @@ function FeedItem({ item, isActive, height, bottomInset, onVote }: any) {
   return (
     <View style={{ height, width: "100%", backgroundColor: "#000" }}>
       <Image source={{ uri: item.poster }} style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={2} />
-      <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls={false} />
+      {Platform.OS !== "web" ? (
+        <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls={false} />
+      ) : null}
       <LinearGradient
         colors={["transparent", "rgba(11,21,34,0.4)", "rgba(11,21,34,0.95)"]}
         locations={[0.4, 0.7, 1]}

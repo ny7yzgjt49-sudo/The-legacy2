@@ -234,7 +234,13 @@ export default function Candidati() {
 
               {video ? (
                 <View style={styles.videoPreview}>
-                  <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="cover" nativeControls={false} />
+                  {Platform.OS !== "web" ? (
+                    <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="cover" nativeControls={false} />
+                  ) : (
+                    <View style={[StyleSheet.absoluteFill, styles.center]}>
+                      <Ionicons name="videocam" size={40} color={colors.brandPrimary} />
+                    </View>
+                  )}
                   <Pressable testID="video-change" onPress={() => setVideo(null)} style={styles.videoChange}>
                     <Ionicons name="close" size={18} color={colors.onSurface} />
                   </Pressable>

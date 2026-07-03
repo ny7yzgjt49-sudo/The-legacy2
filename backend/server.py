@@ -98,22 +98,22 @@ PILLAR_MAP = {p["id"]: p for p in PILLARS}
 
 
 TOUR_SEED = [
-    {"city": "Milano", "region": "Lombardia", "venue": "Campus The Legacy Lab", "date": "2026-09-15",
-     "title": "Kickoff Nazionale", "description": "Apertura ufficiale del Selection Tour e presentazione del format.", "seats": 200},
-    {"city": "Torino", "region": "Piemonte", "venue": "OGR — Officine Grandi Riparazioni", "date": "2026-09-29",
-     "title": "Saper Fare & Innovazione", "description": "Seminario dedicato a manifattura e passaggio generazionale.", "seats": 150},
-    {"city": "Firenze", "region": "Toscana", "venue": "Palazzo dei Congressi", "date": "2026-10-13",
-     "title": "Creatività & Heritage", "description": "Moda, artigianato e brand storici del territorio toscano.", "seats": 180},
-    {"city": "Bologna", "region": "Emilia-Romagna", "venue": "Palazzo Re Enzo", "date": "2026-10-27",
-     "title": "Il Gusto della Motor Valley", "description": "Food, wine e meccanica di precisione.", "seats": 160},
-    {"city": "Venezia", "region": "Veneto", "venue": "Arsenale di Venezia", "date": "2026-11-10",
-     "title": "Artigianato & Identità", "description": "Vetro, tessile e mestieri d'arte lagunari.", "seats": 140},
-    {"city": "Roma", "region": "Lazio", "venue": "Auditorium Parco della Musica", "date": "2026-11-24",
-     "title": "Commercio & Istituzioni", "description": "Impresa, export e dialogo con le istituzioni.", "seats": 220},
-    {"city": "Napoli", "region": "Campania", "venue": "Mostra d'Oltremare", "date": "2026-12-09",
-     "title": "Gusto & Tradizione", "description": "Le eccellenze del Sud tra cibo e artigianato.", "seats": 180},
-    {"city": "Palermo", "region": "Sicilia", "venue": "Teatro Massimo", "date": "2026-12-15",
-     "title": "Finale del Tour", "description": "Selezione finale e racconto delle storie migliori.", "seats": 200},
+    {"city": "Milano", "region": "Lombardia", "venue": "Aziende selezionate · Lombardia", "date": "2026-09-15",
+     "title": "Tappa d'Apertura", "description": "Prima tappa del viaggio: raggiungiamo le imprese selezionate, riprese sul campo e interviste ai fondatori per il format TV.", "seats": 0},
+    {"city": "Torino", "region": "Piemonte", "venue": "Aziende selezionate · Piemonte", "date": "2026-09-29",
+     "title": "Saper Fare & Manifattura", "description": "Visitiamo botteghe e manifatture storiche: raccontiamo il saper fare e il passaggio generazionale con riprese e interviste.", "seats": 0},
+    {"city": "Firenze", "region": "Toscana", "venue": "Aziende selezionate · Toscana", "date": "2026-10-13",
+     "title": "Creatività & Heritage", "description": "Tra moda, artigianato e brand storici toscani: contenuti originali per il format e interviste ai protagonisti.", "seats": 0},
+    {"city": "Bologna", "region": "Emilia-Romagna", "venue": "Aziende selezionate · Emilia-Romagna", "date": "2026-10-27",
+     "title": "Gusto & Motor Valley", "description": "Food, wine e meccanica di precisione: entriamo nelle aziende per riprese e interviste esclusive.", "seats": 0},
+    {"city": "Venezia", "region": "Veneto", "venue": "Aziende selezionate · Veneto", "date": "2026-11-10",
+     "title": "Artigianato & Identità", "description": "Vetro, tessile e mestieri d'arte lagunari raccontati sul campo con riprese e interviste ai maestri.", "seats": 0},
+    {"city": "Roma", "region": "Lazio", "venue": "Aziende selezionate · Lazio", "date": "2026-11-24",
+     "title": "Impresa & Istituzioni", "description": "Storie d'impresa ed export nella Capitale: contenuti per il format TV e dialogo con le istituzioni.", "seats": 0},
+    {"city": "Napoli", "region": "Campania", "venue": "Aziende selezionate · Campania", "date": "2026-12-09",
+     "title": "Gusto & Tradizione", "description": "Le eccellenze del Sud tra cibo e artigianato: riprese nelle aziende e interviste ai fondatori.", "seats": 0},
+    {"city": "Palermo", "region": "Sicilia", "venue": "Aziende selezionate · Sicilia", "date": "2026-12-15",
+     "title": "Gran Finale del Viaggio", "description": "Ultima tappa: le storie migliori del tour raccontate con riprese finali e interviste per il format.", "seats": 0},
 ]
 
 
@@ -398,14 +398,17 @@ async def register_tour(stop_id: str, user: dict = Depends(get_current_user)):
 # ---------------------------------------------------------------------------
 @app.on_event("startup")
 async def seed_data():
-    if await db.tour_stops.count_documents({}) == 0:
+    existing = await db.tour_stops.find_one({})
+    if not existing or existing.get("v") != 2:
+        await db.tour_stops.delete_many({})
         for stop in TOUR_SEED:
             await db.tour_stops.insert_one({
                 "id": str(uuid.uuid4()),
+                "v": 2,
                 **stop,
                 "attendees": [],
             })
-        logger.info("Seeded tour stops")
+        logger.info("Seeded tour stops (v2)")
 
 
 @api_router.get("/")
