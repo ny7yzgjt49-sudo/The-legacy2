@@ -190,9 +190,31 @@ export default function Home() {
           <AppText size={14} color={colors.onSurfaceSecondary} style={{ marginTop: spacing.lg, lineHeight: 23 }}>
             L'82% delle imprese italiane è a conduzione familiare, ma solo il 30% sopravvive oltre il fondatore.
             The Legacy Lab connette imprese, istituzioni, università, capitali e media per custodire e far crescere
-            l'eccellenza italiana attraverso un tour nazionale in 20 regioni.
+            l'eccellenza italiana attraverso un viaggio nazionale in 20 regioni.
           </AppText>
         </View>
+
+        {/* Visione CTA */}
+        <Pressable
+          testID="home-visione-cta"
+          onPress={() => router.push("/progetto")}
+          style={({ pressed }) => [styles.visioneCard, pressed && { opacity: 0.9 }]}
+        >
+          <View style={{ flex: 1 }}>
+            <AppText size={11} weight="bold" color={colors.brandSecondary} style={{ letterSpacing: 1 }}>
+              CHI SIAMO · HUB UNIVERSITARIO
+            </AppText>
+            <Display size={26} style={{ marginTop: 4 }}>
+              La nostra visione
+            </Display>
+            <AppText size={13} color={colors.onSurfaceTertiary} style={{ marginTop: 4 }}>
+              Da dove nasce l'idea, il Founder e il progetto nazionale.
+            </AppText>
+          </View>
+          <View style={styles.visioneArrow}>
+            <Ionicons name="arrow-forward" size={20} color={colors.onBrandPrimary} />
+          </View>
+        </Pressable>
       </ScrollView>
     </View>
   );
@@ -307,5 +329,25 @@ const styles = StyleSheet.create({
     width: 3,
     backgroundColor: colors.brandPrimary,
     borderRadius: 2,
+  },
+  visioneCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.lg,
+    marginHorizontal: spacing.xl,
+    marginTop: spacing["2xl"],
+    padding: spacing.lg,
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  visioneArrow: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.brandPrimary,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

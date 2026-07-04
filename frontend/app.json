@@ -14,7 +14,8 @@
         "NSCameraUsageDescription": "Registra il tuo mini video di candidatura",
         "NSMicrophoneUsageDescription": "Registra l'audio del tuo video",
         "NSPhotoLibraryUsageDescription": "Scegli un video dalla tua galleria"
-      }
+      },
+      "bundleIdentifier": "com.emergent.videocasting.oecakc"
     },
     "android": {
       "adaptiveIcon": {
@@ -27,7 +28,8 @@
         "RECORD_AUDIO",
         "READ_MEDIA_VIDEO",
         "READ_MEDIA_IMAGES"
-      ]
+      ],
+      "package": "com.emergent.videocasting.oecakc"
     },
     "web": {
       "bundler": "metro",
