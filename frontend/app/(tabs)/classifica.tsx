@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Platform,
+  Share,
   useWindowDimensions,
 } from "react-native";
 import { Image } from "expo-image";
@@ -17,7 +18,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
-import { colors, fonts, radius, spacing } from "@/src/theme/theme";
+import { colors, radius, spacing } from "@/src/theme/theme";
 import { AppText, Display } from "@/src/components/ui";
 import { api, videoFileUrl } from "@/src/api/client";
 import { useAuth } from "@/src/context/AuthContext";
@@ -31,9 +32,20 @@ const FILTERS = [
   { id: "identita", label: "Identità" },
 ];
 
+async function shareApplication(item: any) {
+  try {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await Share.share({
+      message: `Vota "${item.business_name}" (${item.category_name}) su The Legacy Lab! 🇮🇹 L'eccellenza del Made in Italy che merita di crescere.`,
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
 export default function Classifica() {
   const insets = useSafeAreaInsets();
-  const { width, height } = useWindowDimensions();
+  const { height } = useWindowDimensions();
   const router = useRouter();
   const { user } = useAuth();
 
@@ -79,14 +91,14 @@ export default function Classifica() {
     }
   };
 
-  const viewabilityPairs = useRef([
-    {
-      viewabilityConfig: { itemVisiblePercentThreshold: 80 },
-      onViewableItemsChanged: ({ viewableItems }: any) => {
-        if (viewableItems?.length > 0) setActiveIndex(viewableItems[0].index ?? 0);
-      },
+  const onFeedScroll = useCallback(
+    (e: any) => {
+      const y = e.nativeEvent.contentOffset.y;
+      const idx = Math.round(y / height);
+      setActiveIndex((prev) => (prev !== idx ? idx : prev));
     },
-  ]).current;
+    [height]
+  );
 
   const Overlay = (
     <View style={[styles.overlayHeader, { paddingTop: insets.top + spacing.sm, pointerEvents: "box-none" }]}>
@@ -170,6 +182,9 @@ export default function Classifica() {
                     {item.votes}
                   </AppText>
                 </Pressable>
+                <Pressable testID={`rank-share-${item.id}`} onPress={() => shareApplication(item)} style={styles.shareBtn}>
+                  <Ionicons name="share-social" size={18} color={colors.onSurface} />
+                </Pressable>
               </View>
             )}
           />
@@ -195,7 +210,8 @@ export default function Classifica() {
           keyExtractor={(i) => i.id}
           pagingEnabled
           showsVerticalScrollIndicator={false}
-          viewabilityConfigCallbackPairs={viewabilityPairs}
+          onScroll={onFeedScroll}
+          scrollEventThrottle={16}
           renderItem={({ item, index }) => (
             <FeedItem
               item={item}
@@ -242,6 +258,12 @@ function FeedItem({ item, isActive, height, bottomInset, onVote }: any) {
           <Ionicons name={item.voted ? "heart" : "heart-outline"} size={34} color={item.voted ? colors.brandPrimary : "#fff"} />
           <AppText size={13} weight="bold" color="#fff">
             {item.votes}
+          </AppText>
+        </Pressable>
+        <Pressable testID={`feed-share-${item.id}`} onPress={() => shareApplication(item)} style={styles.actionBtn}>
+          <Ionicons name="share-social" size={30} color="#fff" />
+          <AppText size={12} weight="medium" color="#fff">
+            Condividi
           </AppText>
         </Pressable>
       </View>
@@ -321,6 +343,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     height: 40,
     borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  shareBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surfaceSecondary,
     borderWidth: 1,
     borderColor: colors.border,
   },
