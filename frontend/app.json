@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "The Legacy Lab",
-    "slug": "frontend",
+    "slug": "the-legacy-lab",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
+    "scheme": "legacylab",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
@@ -15,7 +15,7 @@
         "NSMicrophoneUsageDescription": "Registra l'audio del tuo video",
         "NSPhotoLibraryUsageDescription": "Scegli un video dalla tua galleria"
       },
-      "bundleIdentifier": "com.emergent.videocasting.oecakc"
+      "bundleIdentifier": "com.thelegacylab.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,12 +24,12 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
-        "CAMERA",
-        "RECORD_AUDIO",
-        "READ_MEDIA_VIDEO",
-        "READ_MEDIA_IMAGES"
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_IMAGES"
       ],
-      "package": "com.emergent.videocasting.oecakc"
+      "package": "com.thelegacylab.app"
     },
     "web": {
       "bundler": "metro",
@@ -49,6 +49,15 @@
       ],
       "expo-video",
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#F57C00",
+          "androidMode": "default",
+          "androidCollapsedTitle": "The Legacy Lab"
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "Scegli un video dalla tua galleria",
@@ -59,6 +68,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9f8b38ac-3e48-4999-b39a-4317316e8a8c"
+      }
+    },
+    "owner": "vivisvivis"
   }
 }
