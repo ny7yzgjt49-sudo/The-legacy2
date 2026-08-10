@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { colors, fonts, radius, spacing } from "@/src/theme/theme";
 import { AppText, Display } from "@/src/components/ui";
-import { api, videoFileUrl } from "@/src/api/client";
+import { api, videoFileUrl, videoThumbnailUrl } from "@/src/api/client";
 
 const HERO =
   "https://images.unsplash.com/photo-1612101983284-c15859891526?crop=entropy&cs=srgb&fm=jpg&q=85&w=1400";
@@ -132,10 +132,14 @@ export default function Home() {
               <Pressable
                 key={app.id}
                 testID={`featured-${app.id}`}
-                onPress={() => router.push("/(tabs)/classifica")}
+                onPress={() => router.push(`/c/${app.id}`)}
                 style={[styles.featuredCard, { width: width * 0.62 }]}
               >
-                <Image source={{ uri: app.poster }} style={StyleSheet.absoluteFill} contentFit="cover" />
+                <Image
+                  source={{ uri: app.has_thumbnail ? videoThumbnailUrl(app.video_id) : app.poster }}
+                  style={StyleSheet.absoluteFill}
+                  contentFit="cover"
+                />
                 <LinearGradient
                   colors={["transparent", "rgba(11,21,34,0.95)"]}
                   style={StyleSheet.absoluteFill}

@@ -6,7 +6,6 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
-  Platform,
   Share,
   useWindowDimensions,
 } from "react-native";
@@ -20,7 +19,7 @@ import * as Haptics from "expo-haptics";
 
 import { colors, radius, spacing } from "@/src/theme/theme";
 import { AppText, Display } from "@/src/components/ui";
-import { api, videoFileUrl } from "@/src/api/client";
+import { api, videoFileUrl, videoThumbnailUrl } from "@/src/api/client";
 import { useAuth } from "@/src/context/AuthContext";
 
 const FILTERS = [
@@ -32,11 +31,18 @@ const FILTERS = [
   { id: "identita", label: "Identità" },
 ];
 
+const FRONTEND_URL =
+  Platform.OS === "web" && typeof window !== "undefined"
+    ? window.location.origin
+    : process.env.EXPO_PUBLIC_FRONTEND_URL ?? "";
+
 async function shareApplication(item: any) {
   try {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const url = `${FRONTEND_URL}/c/${item.id}`;
     await Share.share({
-      message: `Vota "${item.business_name}" (${item.category_name}) su The Legacy Lab! 🇮🇹 L'eccellenza del Made in Italy che merita di crescere.`,
+      message: `Vota "${item.business_name}" (${item.category_name}) su The Legacy Lab! 🇮🇹 L'eccellenza del Made in Italy che merita di crescere.\n${url}`,
+      url,
     });
   } catch {
     /* ignore */
@@ -53,19 +59,44 @@ export default function Classifica() {
   const [filter, setFilter] = useState("");
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setActiveIndex(0);
     try {
-      const res = mode === "feed" ? await api.applications(filter || undefined) : await api.leaderboard(filter || undefined);
-      setItems(res);
+      const res = mode === "feed"
+        ? await api.applications(filter || undefined, 1)
+        : await api.leaderboard(filter || undefined, 1);
+      setItems(res.items);
+      setHasMore(res.has_more);
+      setPage(2);
     } catch {
       /* ignore */
     } finally {
       setLoading(false);
     }
   }, [mode, filter]);
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || loading) return;
+    setLoadingMore(true);
+    try {
+      const res = mode === "feed"
+        ? await api.applications(filter || undefined, page)
+        : await api.leaderboard(filter || undefined, page);
+      setItems((prev) => [...prev, ...res.items]);
+      setHasMore(res.has_more);
+      setPage((p) => p + 1);
+    } catch {
+      /* ignore */
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, loading, mode, filter, page]);
 
   useFocusEffect(
     useCallback(() => {
@@ -162,12 +193,25 @@ export default function Classifica() {
             keyExtractor={(i) => i.id}
             contentContainerStyle={{ paddingTop: insets.top + 110, paddingBottom: 120, paddingHorizontal: spacing.xl }}
             showsVerticalScrollIndicator={false}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.3}
+            ListFooterComponent={
+              loadingMore ? (
+                <View style={{ paddingVertical: spacing.xl, alignItems: "center" }}>
+                  <ActivityIndicator color={colors.brandPrimary} />
+                </View>
+              ) : null
+            }
             renderItem={({ item, index }) => (
               <View testID={`rank-item-${item.id}`} style={styles.rankRow}>
                 <Display size={26} color={index < 3 ? colors.brandPrimary : colors.muted} style={{ width: 34 }}>
                   {index + 1}
                 </Display>
-                <Image source={{ uri: item.poster }} style={styles.rankThumb} contentFit="cover" />
+                <Image
+                  source={{ uri: item.has_thumbnail ? videoThumbnailUrl(item.video_id) : item.poster }}
+                  style={styles.rankThumb}
+                  contentFit="cover"
+                />
                 <View style={{ flex: 1 }}>
                   <Display size={19} numberOfLines={1}>
                     {item.business_name}
@@ -212,6 +256,15 @@ export default function Classifica() {
           showsVerticalScrollIndicator={false}
           onScroll={onFeedScroll}
           scrollEventThrottle={16}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={{ height, backgroundColor: "#000", alignItems: "center", justifyContent: "center" }}>
+                <ActivityIndicator color={colors.brandPrimary} size="large" />
+              </View>
+            ) : null
+          }
           renderItem={({ item, index }) => (
             <FeedItem
               item={item}
@@ -242,10 +295,13 @@ function FeedItem({ item, isActive, height, bottomInset, onVote }: any) {
 
   return (
     <View style={{ height, width: "100%", backgroundColor: "#000" }}>
-      <Image source={{ uri: item.poster }} style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={2} />
-      {Platform.OS !== "web" ? (
-        <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls={false} />
-      ) : null}
+      <Image
+        source={{ uri: item.has_thumbnail ? videoThumbnailUrl(item.video_id) : item.poster }}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        blurRadius={2}
+      />
+      <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls={false} />
       <LinearGradient
         colors={["transparent", "rgba(11,21,34,0.4)", "rgba(11,21,34,0.95)"]}
         locations={[0.4, 0.7, 1]}

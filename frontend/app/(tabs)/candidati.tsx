@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -24,14 +24,6 @@ import { AppText, Display, Button } from "@/src/components/ui";
 import { api } from "@/src/api/client";
 import { useAuth } from "@/src/context/AuthContext";
 
-const PILLARS = [
-  { id: "saper-fare", name: "Il Saper Fare", tagline: "Artigianato & manifattura", image: "https://images.unsplash.com/photo-1611523794717-4d1f87dabf3b?w=600&q=80" },
-  { id: "gusto", name: "Il Gusto", tagline: "Food & wine", image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80" },
-  { id: "creativita", name: "La Creatività", tagline: "Moda, design & arte", image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80" },
-  { id: "commercio", name: "Il Commercio", tagline: "Retail & export", image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80" },
-  { id: "identita", name: "L'Identità", tagline: "Brand & heritage", image: "https://images.unsplash.com/photo-1524398039352-5905418087d4?w=600&q=80" },
-];
-
 export default function Candidati() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -47,6 +39,11 @@ export default function Candidati() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+  const [pillars, setPillars] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.categories().then(setPillars).catch(() => {});
+  }, []);
 
   const [camPerm, requestCam] = ImagePicker.useCameraPermissions();
   const [libPerm, requestLib] = ImagePicker.useMediaLibraryPermissions();
@@ -162,7 +159,7 @@ export default function Candidati() {
     }
   };
 
-  const canNext = step === 1 ? !!video : step === 2 ? businessName.trim() && description.trim().length > 5 : !!category;
+  const canNext = step === 1 ? !!video : step === 2 ? businessName.trim() && description.trim().length >= 10 : !!category;
 
   return (
     <View style={styles.root}>
@@ -234,13 +231,7 @@ export default function Candidati() {
 
               {video ? (
                 <View style={styles.videoPreview}>
-                  {Platform.OS !== "web" ? (
-                    <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="cover" nativeControls={false} />
-                  ) : (
-                    <View style={[StyleSheet.absoluteFill, styles.center]}>
-                      <Ionicons name="videocam" size={40} color={colors.brandPrimary} />
-                    </View>
-                  )}
+                  <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="cover" nativeControls={false} />
                   <Pressable testID="video-change" onPress={() => setVideo(null)} style={styles.videoChange}>
                     <Ionicons name="close" size={18} color={colors.onSurface} />
                   </Pressable>

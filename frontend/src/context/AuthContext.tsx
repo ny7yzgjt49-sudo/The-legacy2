@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { storage } from "@/src/utils/storage";
 import { api, setAuthToken } from "@/src/api/client";
 
-type User = { id: string; name: string; email: string };
+type User = { id: string; name: string; email: string; email_verified: boolean };
 
 type AuthContextType = {
   user: User | null;
