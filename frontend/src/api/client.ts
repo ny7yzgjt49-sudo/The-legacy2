@@ -69,6 +69,8 @@ export const api = {
   uploadVideo: (formData: FormData) =>
     req("/api/videos/upload", { method: "POST", body: formData }),
 
+  deleteAccount: () => req("/api/auth/me", { method: "DELETE" }),
+
   registerPushToken: (token: string) =>
     req("/api/push/token", { method: "POST", body: JSON.stringify({ token }) }),
   unregisterPushToken: (token: string) =>

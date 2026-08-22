@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Pressable, TextInput } from "react-native";
+import { View, StyleSheet, Pressable, TextInput, Text } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -46,8 +46,8 @@ export default function Auth() {
       setError("Compila tutti i campi.");
       return;
     }
-    if (password.length < 6) {
-      setError("La password deve avere almeno 6 caratteri.");
+    if (password.length < 8) {
+      setError("La password deve avere almeno 8 caratteri.");
       return;
     }
     setLoading(true);
@@ -162,7 +162,15 @@ export default function Auth() {
 
             {tab === "register" && (
               <AppText size={12} color={colors.muted} style={{ textAlign: "center", marginTop: spacing.lg, lineHeight: 18 }}>
-                Registrandoti aderisci alla community del Made in Italy di The Legacy Lab.
+                Registrandoti accetti i{" "}
+                <Text style={{ color: colors.brandPrimary, textDecorationLine: "underline" }} onPress={() => router.push("/terms")}>
+                  Termini di Servizio
+                </Text>
+                {" "}e la{" "}
+                <Text style={{ color: colors.brandPrimary, textDecorationLine: "underline" }} onPress={() => router.push("/privacy-policy")}>
+                  Privacy Policy
+                </Text>
+                {" "}di The Legacy Lab.
               </AppText>
             )}
           </>

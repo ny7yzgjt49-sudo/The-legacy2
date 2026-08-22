@@ -151,9 +151,9 @@ TOUR_SEED = [
 # Models
 # ---------------------------------------------------------------------------
 class RegisterInput(BaseModel):
-    name: str
+    name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=8)
 
 
 class LoginInput(BaseModel):
@@ -656,6 +656,8 @@ async def create_application(data: ApplicationInput, user: dict = Depends(get_cu
     video = await db.videos.find_one({"id": data.video_id})
     if not video:
         raise HTTPException(status_code=400, detail="Video non trovato")
+    if video.get("owner_id") != user["id"]:
+        raise HTTPException(status_code=403, detail="Non autorizzato ad usare questo video")
     doc = {
         "id": str(uuid.uuid4()),
         "business_name": data.business_name.strip(),
@@ -872,6 +874,38 @@ async def _seed_tour():
         logger.info("Seeded tour stops (v2)")
 
 
+@api_router.delete("/auth/me")
+async def delete_account(user: dict = Depends(get_current_user)):
+    user_id = user["id"]
+    apps = await db.applications.find({"author_id": user_id}).to_list(1000)
+    for app_doc in apps:
+        video_id = app_doc.get("video_id")
+        if video_id:
+            video_doc = await db.videos.find_one({"id": video_id})
+            if video_doc:
+                if video_doc.get("cloudinary_public_id"):
+                    try:
+                        await asyncio.to_thread(
+                            cloudinary.uploader.destroy,
+                            video_doc["cloudinary_public_id"],
+                            resource_type="video",
+                        )
+                    except Exception as e:
+                        logger.warning(f"Cloudinary delete on account deletion: {e}")
+                else:
+                    video_path = UPLOAD_DIR / video_doc["filename"]
+                    if video_path.exists():
+                        video_path.unlink(missing_ok=True)
+                    thumb_path = THUMBNAIL_DIR / f"{video_id}.jpg"
+                    if thumb_path.exists():
+                        thumb_path.unlink(missing_ok=True)
+                await db.videos.delete_one({"id": video_id})
+    await db.applications.delete_many({"author_id": user_id})
+    await db.email_tokens.delete_many({"user_id": user_id})
+    await db.users.delete_one({"id": user_id})
+    return {"deleted": True}
+
+
 @api_router.get("/")
 async def root():
     return {"message": "The Legacy Lab API"}
@@ -886,6 +920,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "media-src 'self' https:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none';"
+    )
+    return response
 
 
 @app.on_event("shutdown")

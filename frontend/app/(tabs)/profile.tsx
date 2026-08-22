@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View, StyleSheet, ScrollView, Pressable, ActivityIndicator, useWindowDimensions, Alert, ToastAndroid, Platform } from "react-native";
+import { View, StyleSheet, ScrollView, Pressable, ActivityIndicator, useWindowDimensions, Alert, ToastAndroid, Platform, Linking } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -252,10 +252,53 @@ export default function Profile() {
           </Pressable>
         )}
 
+        <View style={styles.legalLinks}>
+          <Pressable onPress={() => router.push("/privacy-policy")} style={styles.legalBtn}>
+            <Ionicons name="shield-checkmark-outline" size={15} color={colors.muted} />
+            <AppText size={13} color={colors.muted}>Privacy Policy</AppText>
+          </Pressable>
+          <AppText size={13} color={colors.muted}>·</AppText>
+          <Pressable onPress={() => router.push("/terms")} style={styles.legalBtn}>
+            <Ionicons name="document-text-outline" size={15} color={colors.muted} />
+            <AppText size={13} color={colors.muted}>Termini di servizio</AppText>
+          </Pressable>
+        </View>
+
         <Pressable testID="profile-logout" onPress={logout} style={styles.logout}>
           <Ionicons name="log-out-outline" size={18} color={colors.error} />
           <AppText size={14} weight="medium" color={colors.error}>
             Esci
+          </AppText>
+        </Pressable>
+
+        <Pressable
+          testID="profile-delete-account"
+          onPress={() => {
+            Alert.alert(
+              "Elimina account",
+              "Sei sicuro? Tutti i tuoi dati, candidature e video verranno eliminati definitivamente. Questa azione non può essere annullata.",
+              [
+                { text: "Annulla", style: "cancel" },
+                {
+                  text: "Elimina definitivamente",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      await api.deleteAccount();
+                      logout();
+                    } catch {
+                      Alert.alert("Errore", "Non è stato possibile eliminare l'account. Riprova più tardi.");
+                    }
+                  },
+                },
+              ]
+            );
+          }}
+          style={styles.deleteAccount}
+        >
+          <Ionicons name="trash-outline" size={15} color={colors.muted} />
+          <AppText size={12} color={colors.muted}>
+            Elimina account
           </AppText>
         </Pressable>
       </View>
@@ -302,6 +345,9 @@ const styles = StyleSheet.create({
   emptyCta: { marginTop: spacing.lg, paddingHorizontal: spacing.xl, paddingVertical: spacing.md, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.brandPrimary },
   loadMore: { alignItems: "center", justifyContent: "center", paddingVertical: spacing.lg, marginTop: spacing.md },
   logout: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.sm, marginTop: spacing["2xl"], paddingVertical: spacing.lg },
+  legalLinks: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.sm, marginTop: spacing.xl, flexWrap: "wrap" },
+  legalBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
+  deleteAccount: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.xs, marginTop: spacing.sm, paddingVertical: spacing.md, opacity: 0.6 },
   verifyBanner: {
     flexDirection: "row",
     alignItems: "center",
