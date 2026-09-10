@@ -6,6 +6,7 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
+  Platform,
   Share,
   useWindowDimensions,
 } from "react-native";
